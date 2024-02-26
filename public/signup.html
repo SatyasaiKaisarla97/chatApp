@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signup</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="./styles/signup.css" />
+    <script src="./scripts/signup.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Signup</h2>
+      <form id="signupForm">
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          required
+        /><br />
+        <input type="email" id="email" placeholder="Email" required /><br />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        /><br />
+        <input
+          type="tel"
+          id="phone"
+          placeholder="Phone Number"
+          required
+        /><br />
+        <!-- Added phone number input field -->
+        <button type="submit">Signup</button>
+      </form>
+      <p><a href="/login.html">Already have an account? Login here.</a></p>
+    </div>
+  </body>
+</html>
