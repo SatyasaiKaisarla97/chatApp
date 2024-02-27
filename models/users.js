@@ -18,9 +18,12 @@ const users = sequelize.define("users", {
     unique: true,
   },
   phone: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    validate: {
+      is: /^\d{10}$/,
+    },
   },
   password: {
     type: DataTypes.STRING,

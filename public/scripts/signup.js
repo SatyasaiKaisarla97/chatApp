@@ -23,6 +23,16 @@ document.getElementById("signupForm").addEventListener("submit", function (e) {
     })
     .catch(function (error) {
       console.error(error);
-      alert("Signup failed");
+      if (error.response.status === 409) {
+        if (error.response.data === "Email already in use") {
+          alert("Email already exists. Please use a different email.");
+        } else if (error.response.data === "Phone number already in use") {
+          alert(
+            "Phone number already exists. Please use a different phone number."
+          );
+        }
+      } else {
+        alert("Signup failed");
+      }
     });
 });

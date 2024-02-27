@@ -6,6 +6,14 @@ async function signUp(req, res, next) {
   try {
     const { username, email, password, phone } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+    const existingEmailUser = await users.findOne({ where: { email: email } });
+    if (existingEmailUser) {
+      return res.status(409).send("Email already in use");
+    }
+    const existingPhoneUser = await users.findOne({ where: { phone: phone } });
+    if (existingPhoneUser) {
+      return res.status(409).send("Phone number already in use");
+    }
     const user = await users.create({
       username,
       email,
