@@ -8,7 +8,13 @@ const loginandsignupRoutes = require("./routes/loginandsignupRoutes");
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    methods: ["GET", "POST", "PUT"],
+    credentials: true,
+  })
+);
 app.use(express.static("public"));
 
 app.use("/", loginandsignupRoutes);
