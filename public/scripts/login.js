@@ -8,7 +8,7 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
     .post("/login", { email, password })
     .then((response) => {
       localStorage.setItem("token", response.data.token);
-      window.location.href = "/expense.html";
+      window.location.href = "/dashboard.html";
     })
     .catch((error) => alert("Login failed!"));
 });

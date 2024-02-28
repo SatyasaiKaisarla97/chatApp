@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
 const cors = require("cors");
 const loginandsignupRoutes = require("./routes/loginandsignupRoutes");
+const forgotPasswordRoutes = require("./routes/forgotPasswordRoutes");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(
 app.use(express.static("public"));
 
 app.use("/", loginandsignupRoutes);
+app.use("/user", forgotPasswordRoutes);
 
 sequelize
   .sync({ force: false })
