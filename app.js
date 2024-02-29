@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
 const cors = require("cors");
@@ -20,6 +21,10 @@ app.use(express.static("public"));
 
 app.use("/", loginandsignupRoutes);
 app.use("/user", forgotPasswordRoutes);
+
+app.use((req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+});
 
 sequelize
   .sync({ force: false })
