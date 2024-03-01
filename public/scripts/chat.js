@@ -1,22 +1,59 @@
 document.addEventListener("DOMContentLoaded", function () {
+  fetchUsers();
+  fetchMessages();
   const sendButton = document.getElementById("sendButton");
-
-  sendButton.addEventListener("click", function () {
-    const messageInput = document.getElementById("messageInput");
-    const message = messageInput.value;
-    sendMessage(message);
-  });
+  sendButton.addEventListener("click", sendMessage);
 });
 
-async function sendMessage(message) {
+async function fetchUsers() {
   try {
     const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token not found. User is not authenticated.");
-      return;
-    }
-    const response = await axios.post(
-      "user/chat",
+    const response = await axios.get("/users", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const userList = document.querySelector(".user-list");
+    userList.innerHTML = "";
+    response.data.forEach((user) => {
+      const listItem = document.createElement("li");
+      listItem.textContent = `${user.username} has joined`;
+      userList.appendChild(listItem);
+    });
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+  }
+}
+
+async function fetchMessages() {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get("/users/messages", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const messagesList = response.data;
+    const messagesDiv = document.querySelector(".message-list");
+    messagesDiv.innerHTML = "";
+    messagesList.forEach((message) => {
+      const messageElement = document.createElement("li");
+      messageElement.textContent = `${message.username}: ${message.message}`;
+      messagesDiv.appendChild(messageElement);
+    });
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  } catch (error) {
+    console.error("Failed to fetch messages:", error);
+  }
+}
+
+async function sendMessage() {
+  try {
+    const messageInput = document.getElementById("messageInput");
+    const message = messageInput.value;
+    const token = localStorage.getItem("token");
+    await axios.post(
+      "/users/chat",
       { message },
       {
         headers: {
@@ -24,8 +61,8 @@ async function sendMessage(message) {
         },
       }
     );
-    console.log("Message sent successfully:", response.data);
-    document.getElementById("messageInput").value = "";
+    messageInput.value = "";
+    fetchMessages();
   } catch (error) {
     console.error("Failed to send message:", error);
   }

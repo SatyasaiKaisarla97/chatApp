@@ -25,7 +25,7 @@ app.use(express.static("public"));
 
 app.use("/", loginandsignupRoutes);
 app.use("/user", forgotPasswordRoutes);
-app.use("/user", messageRoutes);
+app.use("/users", messageRoutes);
 
 app.use((req, res, next) => {
   res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
