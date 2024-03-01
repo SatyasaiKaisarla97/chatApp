@@ -6,6 +6,10 @@ const sequelize = require("./util/database");
 const cors = require("cors");
 const loginandsignupRoutes = require("./routes/loginandsignupRoutes");
 const forgotPasswordRoutes = require("./routes/forgotPasswordRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const users = require("./models/users");
+const ForgotPassword = require("./models/forgotpassword");
+const messages = require("./models/messages");
 
 const app = express();
 
@@ -21,10 +25,20 @@ app.use(express.static("public"));
 
 app.use("/", loginandsignupRoutes);
 app.use("/user", forgotPasswordRoutes);
+app.use("/user", messageRoutes);
 
 app.use((req, res, next) => {
   res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
 });
+
+messages.belongsTo(
+  users,
+  { foreignKey: "userId" },
+  { constraints: true, onDelete: "CASCADE" }
+);
+users.hasMany(messages, { foreignKey: "userId" });
+users.hasMany(ForgotPassword, { foreignKey: "userId" });
+ForgotPassword.belongsTo(users, { foreignKey: "userId" });
 
 sequelize
   .sync({ force: false })
