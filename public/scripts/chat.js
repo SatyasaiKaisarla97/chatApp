@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-  fetchUsers();
-  fetchMessages();
+  setInterval(() => {
+    fetchUsers();
+    fetchMessages();
+  }, 1000);
   const sendButton = document.getElementById("sendButton");
   sendButton.addEventListener("click", sendMessage);
 });
