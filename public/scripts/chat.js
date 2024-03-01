@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  setInterval(() => {
-    fetchUsers();
-    fetchMessages();
-  }, 1000);
+  fetchUsers();
+  fetchInitialMessages();
   const sendButton = document.getElementById("sendButton");
   sendButton.addEventListener("click", sendMessage);
 });
@@ -15,6 +13,7 @@ async function fetchUsers() {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log(response);
     const userList = document.querySelector(".user-list");
     userList.innerHTML = "";
     response.data.forEach((user) => {
@@ -27,25 +26,25 @@ async function fetchUsers() {
   }
 }
 
-async function fetchMessages() {
+async function fetchInitialMessages() {
   try {
+    let messages = JSON.parse(localStorage.getItem("messages")) || [];
+    displayMessages(messages);
     const token = localStorage.getItem("token");
     const response = await axios.get("/users/messages", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    const messagesList = response.data;
-    const messagesDiv = document.querySelector(".message-list");
-    messagesDiv.innerHTML = "";
-    messagesList.forEach((message) => {
-      const messageElement = document.createElement("li");
-      messageElement.textContent = `${message.username}: ${message.message}`;
-      messagesDiv.appendChild(messageElement);
-    });
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    const newMessages = response.data;
+    messages.push(...newMessages);
+    if (messages.length > 10) {
+      messages = messages.slice(-10);
+    }
+    localStorage.setItem("messages", JSON.stringify(messages));
+    displayMessages(messages);
   } catch (error) {
-    console.error("Failed to fetch messages:", error);
+    console.error("Failed to fetch initial messages:", error);
   }
 }
 
@@ -64,8 +63,40 @@ async function sendMessage() {
       }
     );
     messageInput.value = "";
-    fetchMessages();
+    fetchNewMessages();
   } catch (error) {
     console.error("Failed to send message:", error);
   }
+}
+
+async function fetchNewMessages() {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get("/users/messages", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    let messages = JSON.parse(localStorage.getItem("messages")) || [];
+    const newMessages = response.data;
+    messages.push(...newMessages);
+    if (messages.length > 10) {
+      messages = messages.slice(-10);
+    }
+    localStorage.setItem("messages", JSON.stringify(messages));
+    displayMessages(messages);
+  } catch (error) {
+    console.error("Failed to fetch new messages:", error);
+  }
+}
+
+function displayMessages(messages) {
+  const messagesDiv = document.querySelector(".message-list");
+  messagesDiv.innerHTML = "";
+  messages.forEach((message) => {
+    const messageElement = document.createElement("li");
+    messageElement.textContent = `${message.username}: ${message.message}`;
+    messagesDiv.appendChild(messageElement);
+  });
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }

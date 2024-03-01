@@ -2,6 +2,7 @@ const messages = require("../models/messages");
 const users = require("../models/users");
 const { v4: uuidv4 } = require("uuid");
 const sequelize = require("../util/database");
+const { Op } = require("sequelize");
 
 async function postMessages(req, res, next) {
   let transaction;
@@ -31,14 +32,23 @@ async function getUsersList(req, res, next) {
 
 async function getMessageList(req, res, next) {
   try {
-    const messagesWithUser = await messages.findAll({
+    const latestMessageId = req.query.latestMessageId;
+    let messagesQuery = {
       include: {
         model: users,
         attributes: ["username"],
         required: true,
       },
       order: [["createdAt", "ASC"]],
-    });
+    };
+    if (latestMessageId !== undefined) {
+      messagesQuery.where = {
+        id: {
+          [Op.gt]: latestMessageId,
+        },
+      };
+    }
+    const messagesWithUser = await messages.findAll(messagesQuery);
 
     const formattedMessages = messagesWithUser.map((message) => ({
       id: message.id,
