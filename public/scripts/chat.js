@@ -1,60 +1,53 @@
 document.addEventListener("DOMContentLoaded", function () {
-  fetchUsers();
-  fetchInitialMessages();
+  fetchGroups();
   const sendButton = document.getElementById("sendButton");
   sendButton.addEventListener("click", sendMessage);
 });
 
-async function fetchUsers() {
+async function fetchGroups() {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get("/users", {
+    const response = await axios.get("/groups", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response);
-    const userList = document.querySelector(".user-list");
-    userList.innerHTML = "";
-    response.data.forEach((user) => {
+    const groupList = document.querySelector(".group-list");
+    groupList.innerHTML = "";
+    response.data.forEach((group) => {
       const listItem = document.createElement("li");
-      listItem.textContent = `${user.username} has joined`;
-      userList.appendChild(listItem);
+      listItem.textContent = `${group.name}`;
+      listItem.dataset.groupId = group.id; // Store group ID as a dataset attribute
+      listItem.addEventListener("click", () => fetchGroupMessages(group.id));
+      groupList.appendChild(listItem);
     });
   } catch (error) {
-    console.error("Failed to fetch users:", error);
+    console.error("Failed to fetch groups:", error);
   }
 }
 
-async function fetchInitialMessages() {
+async function fetchInitialMessages(groupId) {
   try {
-    let messages = JSON.parse(localStorage.getItem("messages")) || [];
-    displayMessages(messages);
     const token = localStorage.getItem("token");
-    const response = await axios.get("/users/messages", {
+    const response = await axios.get(`/users/groups/${groupId}/messages`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    const newMessages = response.data;
-    messages.push(...newMessages);
-    if (messages.length > 10) {
-      messages = messages.slice(-10);
-    }
-    localStorage.setItem("messages", JSON.stringify(messages));
+    const messages = response.data;
     displayMessages(messages);
   } catch (error) {
     console.error("Failed to fetch initial messages:", error);
   }
 }
 
-async function sendMessage() {
+async function sendMessage(groupId) {
   try {
     const messageInput = document.getElementById("messageInput");
     const message = messageInput.value;
     const token = localStorage.getItem("token");
     await axios.post(
-      "/users/chat",
+      `/users/groups/${groupId}/messages`,
       { message },
       {
         headers: {
@@ -63,30 +56,17 @@ async function sendMessage() {
       }
     );
     messageInput.value = "";
-    fetchNewMessages();
+    fetchGroupMessages(groupId);
   } catch (error) {
     console.error("Failed to send message:", error);
   }
 }
 
-async function fetchNewMessages() {
+async function fetchGroupMessages(groupId) {
   try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get("/users/messages", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    let messages = JSON.parse(localStorage.getItem("messages")) || [];
-    const newMessages = response.data;
-    messages.push(...newMessages);
-    if (messages.length > 10) {
-      messages = messages.slice(-10);
-    }
-    localStorage.setItem("messages", JSON.stringify(messages));
-    displayMessages(messages);
+    await fetchInitialMessages(groupId);
   } catch (error) {
-    console.error("Failed to fetch new messages:", error);
+    console.error("Failed to fetch group messages:", error);
   }
 }
 

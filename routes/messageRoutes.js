@@ -4,7 +4,8 @@ const verifyToken = require("../middleware");
 const router = express.Router();
 router.use(verifyToken);
 
-router.post("/chat", messageController.postMessages);
-router.get("/", messageController.getUsersList);
-router.get("/messages", messageController.getMessageList);
+router.post("/groups/:groupId/chat", messageController.postGroupMessages);
+router.get("/groups/:groupId/users", messageController.getGroupUsersList);
+router.get("/groups/:groupId/messages", messageController.getGroupMessageList);
+
 module.exports = router;

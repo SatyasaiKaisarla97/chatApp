@@ -4,14 +4,17 @@ const { v4: uuidv4 } = require("uuid");
 const sequelize = require("../util/database");
 const { Op } = require("sequelize");
 
-async function postMessages(req, res, next) {
+async function postGroupMessages(req, res, next) {
   let transaction;
   try {
     transaction = await sequelize.transaction();
-    const { message } = req.body;
+    const { groupId, message } = req.body;
     const userId = req.user.userId;
     const messageId = uuidv4();
-    await messages.create({ id: messageId, userId, message }, { transaction });
+    await messages.create(
+      { id: messageId, userId, groupId, message },
+      { transaction }
+    );
     await transaction.commit();
     res.status(200).json({ message: "Message sent successfully" });
   } catch (error) {
@@ -20,18 +23,27 @@ async function postMessages(req, res, next) {
     res.status(500).json({ message: "Failed to send message" });
   }
 }
-async function getUsersList(req, res, next) {
+
+async function getGroupUsersList(req, res, next) {
   try {
-    const userList = await users.findAll();
+    const groupId = req.params.groupId;
+    // Fetch users within the specified group
+    const userList = await users.findAll({
+      include: {
+        model: messages,
+        where: { groupId },
+      },
+    });
     res.status(200).json(userList);
   } catch (error) {
-    console.error("Failed to fetch users:", error);
-    res.status(500).json({ message: "Failed to fetch users" });
+    console.error("Failed to fetch users in the group:", error);
+    res.status(500).json({ message: "Failed to fetch users in the group" });
   }
 }
 
-async function getMessageList(req, res, next) {
+async function getGroupMessageList(req, res, next) {
   try {
+    const groupId = req.params.groupId;
     const latestMessageId = req.query.latestMessageId;
     let messagesQuery = {
       include: {
@@ -39,20 +51,18 @@ async function getMessageList(req, res, next) {
         attributes: ["username"],
         required: true,
       },
+      where: { groupId },
       order: [["createdAt", "ASC"]],
     };
     if (latestMessageId !== undefined) {
-      messagesQuery.where = {
-        id: {
-          [Op.gt]: latestMessageId,
-        },
-      };
+      messagesQuery.where.id = { [Op.gt]: latestMessageId };
     }
     const messagesWithUser = await messages.findAll(messagesQuery);
 
     const formattedMessages = messagesWithUser.map((message) => ({
       id: message.id,
       userId: message.userId,
+      groupId: message.groupId,
       message: message.message,
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
@@ -61,12 +71,13 @@ async function getMessageList(req, res, next) {
 
     res.status(200).json(formattedMessages);
   } catch (error) {
-    console.error("Failed to fetch messages with user:", error);
-    res.status(500).json({ message: "Failed to fetch messages with user" });
+    console.error("Failed to fetch messages in the group:", error);
+    res.status(500).json({ message: "Failed to fetch messages in the group" });
   }
 }
+
 module.exports = {
-  postMessages,
-  getUsersList,
-  getMessageList,
+  postGroupMessages,
+  getGroupUsersList,
+  getGroupMessageList,
 };

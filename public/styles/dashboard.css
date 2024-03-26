@@ -112,8 +112,7 @@ h2 {
 }
 .message-list li {
   list-style: none;
-  margin : 10px;
+  margin : 25px;
   padding: 5px;
   color: rgb(222, 208, 208);
-  background-color: #1d10825c;
 }

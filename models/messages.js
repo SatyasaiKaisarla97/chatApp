@@ -11,6 +11,14 @@ const messages = sequelize.define("messages", {
       key: "id",
     },
   },
+  groupId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "groups",
+      key: "id",
+    },
+  },
   id: {
     type: DataTypes.UUID,
     defaultValue: () => DataTypes.UUIDV4(),
