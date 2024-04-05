@@ -30,20 +30,20 @@ h2 {
   margin-bottom: 10px;
 }
 
-.user-list {
+.group-list {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-.user-list li {
+.group-list li {
   margin-bottom: 10px;
   cursor: pointer;
   color: white;
   transition: background-color 0.3s ease;
 }
 
-.user-list li:hover {
+.group-list li:hover {
   background-color: #28054a;
 }
 

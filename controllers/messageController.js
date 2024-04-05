@@ -7,18 +7,32 @@ const { Op } = require("sequelize");
 async function postGroupMessages(req, res, next) {
   let transaction;
   try {
-    transaction = await sequelize.transaction();
     const { groupId, message } = req.body;
-    const userId = req.user.userId;
-    const messageId = uuidv4();
-    await messages.create(
-      { id: messageId, userId, groupId, message },
+    console.log(req.body)
+    const userId = req.user.userId; // Assuming you're using middleware to set req.user.userId
+
+    // Start transaction
+    transaction = await sequelize.transaction();
+
+    // Create a new message
+    const newMessage = await messages.create(
+      {
+        id: uuidv4(), // Generate a UUID for message id
+        userId: userId,
+        groupId: groupId,
+        message: message,
+      },
       { transaction }
     );
+
+    // Commit transaction
     await transaction.commit();
-    res.status(200).json({ message: "Message sent successfully" });
+
+    res.status(201).json({ message: "Message sent successfully", newMessage });
   } catch (error) {
+    // Rollback transaction in case of error
     if (transaction) await transaction.rollback();
+
     console.error("Failed to send message:", error);
     res.status(500).json({ message: "Failed to send message" });
   }
@@ -27,6 +41,7 @@ async function postGroupMessages(req, res, next) {
 async function getGroupUsersList(req, res, next) {
   try {
     const groupId = req.params.groupId;
+
     // Fetch users within the specified group
     const userList = await users.findAll({
       include: {
@@ -34,6 +49,7 @@ async function getGroupUsersList(req, res, next) {
         where: { groupId },
       },
     });
+
     res.status(200).json(userList);
   } catch (error) {
     console.error("Failed to fetch users in the group:", error);
@@ -45,6 +61,7 @@ async function getGroupMessageList(req, res, next) {
   try {
     const groupId = req.params.groupId;
     const latestMessageId = req.query.latestMessageId;
+
     let messagesQuery = {
       include: {
         model: users,
@@ -54,9 +71,11 @@ async function getGroupMessageList(req, res, next) {
       where: { groupId },
       order: [["createdAt", "ASC"]],
     };
+
     if (latestMessageId !== undefined) {
       messagesQuery.where.id = { [Op.gt]: latestMessageId };
     }
+
     const messagesWithUser = await messages.findAll(messagesQuery);
 
     const formattedMessages = messagesWithUser.map((message) => ({
