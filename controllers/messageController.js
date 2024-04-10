@@ -8,7 +8,6 @@ async function postGroupMessages(req, res, next) {
   let transaction;
   try {
     const { groupId, message } = req.body;
-    console.log(req.body)
     const userId = req.user.userId; // Assuming you're using middleware to set req.user.userId
 
     // Start transaction
@@ -95,8 +94,48 @@ async function getGroupMessageList(req, res, next) {
   }
 }
 
+async function inviteUsersToGroup(req, res, next) {
+  try {
+    const { groupId } = req.params;
+    const { userIds } = req.body;
+
+    // Add invited users to the group
+    await Promise.all(
+      userIds.map(async (userId) => {
+        await users.findByPk(userId).then(async (user) => {
+          await user.addGroup(groupId);
+        });
+      })
+    );
+
+    res.status(200).json({ message: "Users invited to group successfully" });
+  } catch (error) {
+    console.error("Failed to invite users to group:", error);
+    res.status(500).json({ message: "Failed to invite users to group" });
+  }
+}
+async function searchUsers(req, res, next) {
+  try {
+    const { query } = req.query;
+    const searchResult = await users.findAll({
+      where: {
+        username: {
+          [Op.like]: `%${query}%`, // Using Sequelize's like operator for partial matching
+        },
+      },
+      attributes: ["id", "username"], // Only fetching user id and username
+    });
+    res.status(200).json(searchResult);
+  } catch (error) {
+    console.error("Failed to search users:", error);
+    res.status(500).json({ message: "Failed to search users" });
+  }
+}
+
 module.exports = {
   postGroupMessages,
   getGroupUsersList,
   getGroupMessageList,
+  inviteUsersToGroup,
+  searchUsers, // Adding searchUsers function to module exports
 };

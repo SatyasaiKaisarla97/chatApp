@@ -37,6 +37,11 @@ const users = sequelize.define("users", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  isAdmin: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 });
 
 module.exports = users;

@@ -12,8 +12,29 @@
       <div class="sidebar">
         <h2>Groups</h2>
         <ul class="group-list"></ul>
-        <input type="text" id="groupNameInput" placeholder="Enter group name" />
-        <button id="createGroupButton">Create Group</button>
+        <button id="showCreateGroupButton">Create Group</button>
+        <div id="createGroupSection" style="display: none">
+          <input
+            type="text"
+            id="groupNameInput"
+            placeholder="Enter group name"
+          />
+          <button id="createGroupButton">Create Group</button>
+        </div>
+        <!-- Search bar for inviting users -->
+        <div id="searchUsersSection" style="display: none">
+          <input
+            type="text"
+            id="searchUserInput"
+            placeholder="Search users to invite"
+          />
+          <button id="inviteUserButton">Invite</button>
+        </div>
+        <!-- User list section -->
+        <div id="userListSection" style="display: none">
+          <h2>Group Users</h2>
+          <ul class="user-list"></ul>
+        </div>
       </div>
       <div class="chatroom">
         <div class="messages">

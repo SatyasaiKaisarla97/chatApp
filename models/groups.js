@@ -14,6 +14,14 @@ const groups = sequelize.define("groups", {
     allowNull: false,
     unique: true,
   },
+  creatorId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: users,
+      key: "id",
+    },
+  },
 });
 
 module.exports = groups;

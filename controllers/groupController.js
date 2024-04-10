@@ -10,11 +10,15 @@ async function getGroups(req, res) {
   }
 }
 
-async function createGroup(req, res) {
-  const { name } = req.body;
+async function createGroup(req, res, next) {
   try {
-    const group = await groups.create({ name });
-    res.status(201).json({ message: "Group created successfully", group });
+    const { name } = req.body;
+    const creatorId = req.user.userId; // Assuming you're using middleware to set req.user.userId
+
+    // Create the group
+    const newGroup = await groups.create({ name, creatorId });
+
+    res.status(201).json({ message: "Group created successfully", newGroup });
   } catch (error) {
     console.error("Failed to create group:", error);
     res.status(500).json({ message: "Failed to create group" });
