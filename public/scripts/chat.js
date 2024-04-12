@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const socket = io();
+
   fetchGroups();
   const sendButton = document.getElementById("sendButton");
   const showCreateGroupButton = document.getElementById(
@@ -37,6 +39,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event listener for inviting users
   inviteUserButton.addEventListener("click", inviteUser);
+
+  // Socket event listeners
+  socket.on("message", function (message) {
+    const messagesDiv = document.querySelector(".message-list");
+    const messageElement = document.createElement("li");
+    messageElement.textContent = message;
+    messagesDiv.appendChild(messageElement);
+  });
+
+  socket.on("groupUpdated", function () {
+    fetchGroups();
+  });
 });
 
 let currentGroupId = null;
@@ -86,10 +100,8 @@ async function createGroup() {
       }
     );
     console.log(response);
-    fetchGroups();
-    // Hide the create group section after creating the group
-    const createGroupSection = document.getElementById("createGroupSection");
-    createGroupSection.style.display = "none";
+    // Emit event to notify group update
+    socket.emit("groupUpdated");
     groupNameInput.value = ""; // Clear the input field
   } catch (error) {
     console.error("Failed to create group:", error);
@@ -160,7 +172,6 @@ async function sendMessage() {
       }
     );
     messageInput.value = "";
-    fetchNewMessages();
   } catch (error) {
     console.error("Failed to send message:", error);
   }
@@ -177,18 +188,14 @@ async function fetchNewMessages() {
         },
       }
     );
-    displayMessages(response.data);
+    const messagesDiv = document.querySelector(".message-list");
+    messagesDiv.innerHTML = "";
+    response.data.forEach((message) => {
+      const messageElement = document.createElement("li");
+      messageElement.textContent = `${message.username}: ${message.message}`;
+      messagesDiv.appendChild(messageElement);
+    });
   } catch (error) {
     console.error("Failed to fetch new messages:", error);
   }
-}
-
-function displayMessages(messages) {
-  const messagesDiv = document.querySelector(".message-list");
-  messagesDiv.innerHTML = "";
-  messages.forEach((message) => {
-    const messageElement = document.createElement("li");
-    messageElement.textContent = `${message.username}: ${message.message}`;
-    messagesDiv.appendChild(messageElement);
-  });
 }

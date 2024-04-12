@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat App</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.0/socket.io.min.js"></script>
     <link rel="stylesheet" href="./styles/dashboard.css" />
   </head>
   <body>
@@ -30,11 +31,9 @@
           />
           <button id="inviteUserButton">Invite</button>
         </div>
-        <!-- User list section -->
-        <div id="userListSection" style="display: none">
-          <h2>Group Users</h2>
-          <ul class="user-list"></ul>
-        </div>
+        <!-- User list -->
+        <h2>Users</h2>
+        <ul class="user-list"></ul>
       </div>
       <div class="chatroom">
         <div class="messages">
